@@ -73,7 +73,7 @@ for s in jDays:
     tn_events, tn_sow = convertToDatFile(days)    
     sow = datetime.fromtimestamp(tn_sow)
 
-    key = sow.strftime('%Y.%M.%d')
+    key = sow.strftime('%Y.%m.%d')
     val = json.dumps(tn_events, separators=(',', ':'))
     fn = f'{rootdir}{key}.dat'
     
