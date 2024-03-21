@@ -2,7 +2,7 @@
 # Date: 2024/03/21
 # Usage:
 #   Ví dụ: mở https://www.forexfactory.com/calendar?week=mar17.2024
-#   vào developẻ tools -> network -> https://www.forexfactory.com/calendar?week=mar17.2024
+#   vào developer tools -> network -> https://www.forexfactory.com/calendar?week=mar17.2024
 #   copy toàn bộ
 #   chạy python
 
@@ -10,10 +10,12 @@ import win32clipboard
 import re
 import json
 from datetime import datetime, timedelta
+import requests
 
 rootdir = './data/'
 # Theo cài đặt trên trang web: - timeZone - 4???
 timeZone = timedelta(hours=-11)
+oneweek = timedelta(days=7)
 
 def getClipboard() -> str:
     win32clipboard.OpenClipboard()
@@ -34,6 +36,8 @@ def getImpact(s: str) -> str:
     if s.startswith('Low'): return 'Low'
     elif s.startswith('Medium'): return 'Medium'
     elif s.startswith('High'): return 'High'
+    elif s.startswith('Non'): return 'Non'
+    else: return ''
     # elif s.startswith('Very high'): return 'Very High'
 
 def convertTime(tstr: str):
@@ -66,20 +70,41 @@ def convertToDatFile(days):
 
     return events, startOfWeek
 
-jDays = extractData(getClipboard())
-print(f'Number of found blocks: {len(jDays)}')
-for s in jDays:
-    days = json.loads(s)
-    tn_events, tn_sow = convertToDatFile(days)    
-    sow = datetime.fromtimestamp(tn_sow)
+def parseNSave():
+    jDays = extractData(getClipboard())
+    print(f'Number of found blocks: {len(jDays)}')
+    for s in jDays:
+        days = json.loads(s)
+        tn_events, tn_sow = convertToDatFile(days)    
+        sow = datetime.fromtimestamp(tn_sow)
 
-    key = sow.strftime('%Y.%m.%d')
-    val = json.dumps(tn_events, separators=(',', ':'))
-    fn = f'{rootdir}{key}.dat'
-    
-    txt = json.dumps({key: val}, separators=(',', ':'))
-    f = open(fn, "w")
-    f.write(txt)
-    f.close()
-    
-    print(f'Save to {fn}')
+        key = sow.strftime('%Y.%m.%d')
+        val = json.dumps(tn_events, separators=(',', ':'))
+        fn = f'{rootdir}{key}.dat'
+        
+        txt = json.dumps({key: val}, separators=(',', ':'))
+        f = open(fn, "w")
+        f.write(txt)
+        f.close()
+        
+        print(f'Save to {fn}')
+
+def crawlff(startDate: datetime, endDate: datetime):
+    """ startDate must be Sunday """
+    while startDate < endDate:
+        # url = 'https://www.forexfactory.com/calendar?week=feb25.2024'
+        url = f'https://www.forexfactory.com/calendar?week={dt.strftime('%b%d.%Y')}'
+        headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' }
+        x = requests.get(url, headers=headers)
+        if x.status_code == 200:
+            txt = x.content.decode()
+            win32clipboard.OpenClipboard()
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardText(txt, win32clipboard.CF_TEXT)
+            win32clipboard.CloseClipboard()
+            parseNSave()
+        else:
+            print(x.status_code)
+        startDate = startDate + oneweek
+
+crawlff(datetime(year=2007,month=1,day=7), datetime(year=2008,month=1,day=1))
