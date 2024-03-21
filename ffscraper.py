@@ -1,14 +1,19 @@
 # Extract data from forexfactory.com
 # Date: 2024/03/21
+# Usage:
+#   Ví dụ: mở https://www.forexfactory.com/calendar?week=mar17.2024
+#   vào developẻ tools -> network -> https://www.forexfactory.com/calendar?week=mar17.2024
+#   copy toàn bộ
+#   chạy python
 
 import win32clipboard
 import re
 import json
 from datetime import datetime, timedelta
 
-rootdir = ''
-# Theo cài đặt trên trang web
-timeZone = 7
+rootdir = './data/'
+# Theo cài đặt trên trang web: - timeZone - 4???
+timeZone = timedelta(hours=-11)
 
 def getClipboard() -> str:
     win32clipboard.OpenClipboard()
@@ -31,41 +36,50 @@ def getImpact(s: str) -> str:
     elif s.startswith('High'): return 'High'
     # elif s.startswith('Very high'): return 'Very High'
 
+def convertTime(tstr: str):
+    tstr = tstr.lower()
+    if tstr == 'all day': 
+        return timedelta()
+    # elif tstr == '22nd-23rd':
+    #     pass
+    else:
+        t:datetime = datetime.strptime(tstr, "%I:%M%p")
+        return timedelta(hours=t.hour, minutes=t.minute)
+
+
 def convertToDatFile(days):
     """ Chuyen doi tuong trich tu html sang doi tuong dung cho Expert 'trading_news' """
+    startOfWeek = None
     events = []
     for d in days:
+        startOfWeek = d['dateline'] if startOfWeek is None else min(startOfWeek, d['dateline'])
         for e in d['events']:            
             tne = {}
             tne['title'] = e['name']
             tne['country'] = e['currency']
-            dt = datetime.strptime(f'{e['date']} {e['timeLabel']}', '%b %d, %Y %I:%M%p')
-            # Need recheck!!!
-            tne['date'] = (dt - timedelta(hours=timeZone)).strftime('%Y-%m-%d %H:%M:%S')
+            dt = datetime.fromtimestamp(e['dateline'])
+            tne['date'] = (dt - timeZone).strftime('%Y-%m-%dT%H:%M:%S-04:00')
             tne['impact'] = getImpact(e['impactTitle'])
             tne['forecast'] = e['forecast']
             tne['previous'] = e['previous']
             events.append(tne)
 
-    return events
+    return events, startOfWeek
 
-# for s in findJavascript(getClipboard()):
-#     data = extractData(s)
-#     if data is not None and len(data) > 0:
-#         print(s)
-#         print(data)
+jDays = extractData(getClipboard())
+print(f'Number of found blocks: {len(jDays)}')
+for s in jDays:
+    days = json.loads(s)
+    tn_events, tn_sow = convertToDatFile(days)    
+    sow = datetime.fromtimestamp(tn_sow)
 
-# cb = getClipboard()
-# data = extractData(cb)
-# for s in data:
-#     print(s)
-#     arr_events = json.loads(s)
-#     for e in arr_events:
-#         print(e)
-
-# 1709325000
-
-# dt = datetime.strptime('Mar 2, 2024 3:30am', '%b %d, %Y %I:%M%p')
-# print(dt)
-# dt1 = datetime.fromtimestamp(1709325000)
-# print(dt1)
+    key = sow.strftime('%Y.%M.%d')
+    val = json.dumps(tn_events, separators=(',', ':'))
+    fn = f'{rootdir}{key}.dat'
+    
+    txt = json.dumps({key: val}, separators=(',', ':'))
+    f = open(fn, "w")
+    f.write(txt)
+    f.close()
+    
+    print(f'Save to {fn}')
