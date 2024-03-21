@@ -93,7 +93,7 @@ def crawlff(startDate: datetime, endDate: datetime):
     """ startDate must be Sunday """
     while startDate < endDate:
         # url = 'https://www.forexfactory.com/calendar?week=feb25.2024'
-        url = f'https://www.forexfactory.com/calendar?week={dt.strftime('%b%d.%Y')}'
+        url = f'https://www.forexfactory.com/calendar?week={startDate.strftime('%b%d.%Y')}'
         headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' }
         x = requests.get(url, headers=headers)
         if x.status_code == 200:
@@ -107,4 +107,22 @@ def crawlff(startDate: datetime, endDate: datetime):
             print(x.status_code)
         startDate = startDate + oneweek
 
-crawlff(datetime(year=2007,month=1,day=7), datetime(year=2008,month=1,day=1))
+# Lay du lieu tung nam tu nam 2007
+# crawlff(datetime(year=2007,month=1,day=7), datetime(year=2008,month=1,day=1))
+# crawlff(datetime(year=2008,month=1,day=6), datetime(year=2009,month=1,day=1))
+# crawlff(datetime(year=2009,month=1,day=4), datetime(year=2010,month=1,day=1))
+# crawlff(datetime(year=2010,month=1,day=3), datetime(year=2011,month=1,day=1))
+# crawlff(datetime(year=2011,month=1,day=2), datetime(year=2012,month=1,day=1))
+# crawlff(datetime(year=2012,month=1,day=1), datetime(year=2013,month=1,day=1))
+# crawlff(datetime(year=2013,month=1,day=6), datetime(year=2014,month=1,day=1))
+# crawlff(datetime(year=2014,month=1,day=5), datetime(year=2015,month=1,day=1))
+# crawlff(datetime(year=2015,month=1,day=4), datetime(year=2016,month=1,day=1))
+# crawlff(datetime(year=2016,month=1,day=3), datetime(year=2017,month=1,day=1))
+# crawlff(datetime(year=2017,month=1,day=1), datetime(year=2018,month=1,day=1))
+# crawlff(datetime(year=2018,month=1,day=7), datetime(year=2019,month=1,day=1))
+# crawlff(datetime(year=2019,month=1,day=6), datetime(year=2020,month=1,day=1))
+# crawlff(datetime(year=2020,month=1,day=5), datetime(year=2021,month=1,day=1))
+# crawlff(datetime(year=2021,month=1,day=3), datetime(year=2022,month=1,day=1))
+# crawlff(datetime(year=2022,month=1,day=2), datetime(year=2023,month=1,day=1))
+crawlff(datetime(year=2023,month=1,day=1), datetime(year=2024,month=1,day=1))
+# crawlff(datetime(year=2024,month=1,day=7), datetime(year=2024,month=3,day=21))
