@@ -2,14 +2,14 @@
 # Date: 2024/03/21
 
 import win32clipboard
-import re
-import json
+import re, json, os
 from datetime import datetime, timedelta
 import requests
 
 rootdir = './data/'
 # Theo cài đặt trên trang web: - timeZone - 4???
-timeZone = timedelta(hours=-11)
+timeZone = timedelta(hours=-7)
+timeZoneMq5 = timedelta(hours=-11)
 oneweek = timedelta(days=7)
 
 def get1stWeek(year: int) -> datetime:
@@ -62,7 +62,7 @@ def convertToDatFile(days):
             tne['title'] = e['name']
             tne['country'] = e['currency']
             dt = datetime.fromtimestamp(e['dateline'])
-            tne['date'] = (dt - timeZone).strftime('%Y-%m-%dT%H:%M:%S-04:00')
+            tne['date'] = (dt - timeZoneMq5).strftime('%Y-%m-%dT%H:%M:%S-04:00')
             tne['impact'] = getImpact(e['impactTitle'])
             tne['forecast'] = e['forecast']
             tne['previous'] = e['previous']
@@ -72,7 +72,7 @@ def convertToDatFile(days):
 
 def parseNSave(s: str):
     jDays = extractData(s)
-    print(f'Number of found blocks: {len(jDays)}')
+    print(f'--> Number of found blocks: {len(jDays)}')
     for s in jDays:
         days = json.loads(s)
         tn_events, tn_sow = convertToDatFile(days)    
@@ -87,12 +87,39 @@ def parseNSave(s: str):
         f.write(txt)
         f.close()
         
-        print(f'Save to {fn}')
+        print(f'--> Save to {fn}')
 
-def parseNSaveCB():
+def parseNSaveCsv(s: str, fn: str):
+    writeHeader = not os.path.isfile(fn)
+        
+    file = open(fn, "a")
+    if writeHeader: file.write('gmt0, dateline, currency, impact, timeLabel, name, actual, forecast, previous')
+
+    jDays = extractData(s)
+    print(f'--> Number of found blocks: {len(jDays)}')
+    for b in jDays:        
+        days = json.loads(b)
+        for d in days:
+            for e in d['events']:
+                dt = datetime.fromtimestamp(e['dateline'])
+                c0 = (dt - timeZone).strftime('%Y/%m/%d %H:%M')
+                c1 = e['dateline']
+                c2 = e['currency']
+                c3 = e['impactTitle']
+                c4 = e['timeLabel']
+                c5 = e['name']            
+                c6 = e['actual']
+                c7 = e['forecast']
+                c8 = e['previous']
+                file.write(f'{c0}, {c1}, {c2}, "{c3}", "{c4}", "{c5}", {c6}, {c7}, {c8}\n')
+    
+    print(f'--> Save to: {fn}')
+    file.close()
+
+def parseNSaveClipboard():
     parseNSave(getClipboard())
 
-def crawlff(startDate: datetime, endDate: datetime):
+def crawlff(startDate: datetime, endDate: datetime, saveCSV = False):
     """ startDate must be Sunday """
     while startDate < endDate:
         print(f'Mine week: {startDate.strftime('%a %Y/%m/%d')}')
@@ -102,9 +129,13 @@ def crawlff(startDate: datetime, endDate: datetime):
         x = requests.get(url, headers=headers)
         if x.status_code == 200:
             txt = x.content.decode()
-            parseNSave(txt)
+            if saveCSV:
+                fn = f'{rootdir}{startDate.strftime('%Y')}.csv'
+                parseNSaveCsv(txt, fn)
+            else:
+                parseNSave(txt)
         else:
-            print(x.status_code)
+            print(f'Status_code = {x.status_code}')
         startDate = startDate + oneweek
 
 # Lay du lieu tung nam tu nam 2007
@@ -124,5 +155,8 @@ def crawlff(startDate: datetime, endDate: datetime):
 # crawlff(datetime(year=2020,month=1,day=5), datetime(year=2021,month=1,day=1))
 # crawlff(datetime(year=2021,month=1,day=3), datetime(year=2022,month=1,day=1))
 # crawlff(datetime(year=2022,month=1,day=2), datetime(year=2023,month=1,day=1))
-# crawlff(datetime(year=2023,month=1,day=1), datetime(year=2024,month=1,day=1))
+crawlff(datetime(year=2023,month=1,day=1), datetime(year=2024,month=1,day=1), True)
 # crawlff(datetime(year=2024,month=1,day=7), datetime(year=2025,month=1,day=1))
+
+# parseNSaveClipboard()
+        
