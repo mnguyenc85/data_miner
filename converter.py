@@ -41,7 +41,7 @@ def parseImpact(s: str) -> str:
     else: return s
     # elif s.startswith('Very high'): return 'Very High'
 
-def saveToDat(year: int, startDate: None, endDate: None):
+def saveToDat(year: int, startDate = None, endDate = None):
     '''
     Load data from .csv va save vao file .dat
     Args:
@@ -63,7 +63,7 @@ def saveToDat(year: int, startDate: None, endDate: None):
         w1 = w0 + week
         w_df = df[(df['dateline'] >= w0.timestamp()) & (df['dateline'] < w1.timestamp())]
         if w_df.shape[0] > 0:
-            print(f'Week {startDate} has {w_df.shape[0]} events')
+            print(f'Week {w0} has {w_df.shape[0]} events')
             events = []
             for r in w_df.itertuples(index=False, name=None):
                 e = {}
@@ -90,4 +90,22 @@ def saveToDat(year: int, startDate: None, endDate: None):
         w0 = w1
 
 # ff_df = loadYear(2006)
-saveToDat(2024, datetime(day=18,month=3,year=2024), datetime(day=28,month=3,year=2024))
+saveToDat(2006)
+saveToDat(2007)
+saveToDat(2008)
+saveToDat(2009)
+saveToDat(2010)
+saveToDat(2011)
+saveToDat(2012)
+saveToDat(2013)
+saveToDat(2014)
+saveToDat(2015)
+saveToDat(2016)
+saveToDat(2017)
+saveToDat(2018)
+saveToDat(2019)
+saveToDat(2020)
+saveToDat(2021)
+saveToDat(2022)
+saveToDat(2023)
+saveToDat(2024, None, datetime(day=1,month=4,year=2024))
