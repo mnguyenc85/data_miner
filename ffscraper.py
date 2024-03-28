@@ -2,7 +2,7 @@
 # Date: 2024/03/21
 
 import win32clipboard
-import re, json, os
+import re, json, os, time
 from datetime import datetime, timedelta
 import requests
 
@@ -100,7 +100,7 @@ def parseNSaveCsv(s: str, fn: str) -> int:
         writeHeader = not os.path.isfile(fn)
             
         file = open(fn, "a")
-        if writeHeader: file.write('gmt+7, dateline, currency, impact, timeLabel, name, actual, forecast, previous\n')
+        if writeHeader: file.write('gmt7,dateline,currency,impact,timeLabel,name,actual,forecast,previous\n')
 
         jDays = extractData(s)
         print(f'--> Number of found blocks: {len(jDays)}')
@@ -118,7 +118,7 @@ def parseNSaveCsv(s: str, fn: str) -> int:
                     c6 = e['actual']
                     c7 = e['forecast']
                     c8 = e['previous']
-                    file.write(f'{c0}, {c1}, {c2}, "{c3}", "{c4}", "{c5}", {c6}, {c7}, {c8}\n')
+                    file.write(f'{c0},{c1},{c2},"{c3}","{c4}","{c5}",{c6},{c7},{c8}\n')
         
         print(f'--> Save to: {fn}')
         file.close()
@@ -132,7 +132,12 @@ def parseNSaveClipboard():
     parseNSave(getClipboard())
 
 def crawlff(startDate: datetime, endDate: datetime, saveCSV = False):
-    """ startDate must be Sunday """
+    '''
+    Lay du lieu tu forexfactory, bat dau tu startDate den endDate
+    Args:
+        startDate: phai la chu nhat
+        saveCSV: true -> luu vao file .csv theo nam, false -> luu vao file .dat theo tuan
+    '''
     noerr = 0
 
     while startDate < endDate:
@@ -144,7 +149,7 @@ def crawlff(startDate: datetime, endDate: datetime, saveCSV = False):
         if x.status_code == 200:
             txt = x.content.decode()
             if saveCSV:
-                fn = f'{rootdir}{startDate.strftime('%Y')}.csv'
+                fn = f'{rootdir}ff{startDate.strftime('%Y')}.csv'
                 noerr += parseNSaveCsv(txt, fn)
             else:
                 noerr += parseNSave(txt)
@@ -156,24 +161,25 @@ def crawlff(startDate: datetime, endDate: datetime, saveCSV = False):
     print(f"No. error: {noerr}")
 
 # Lay du lieu tung nam tu nam 2007
-# crawlff(datetime(year=2007,month=1,day=7), datetime(year=2008,month=1,day=1))
-# crawlff(datetime(year=2008,month=1,day=6), datetime(year=2009,month=1,day=1))
-# crawlff(datetime(year=2009,month=1,day=4), datetime(year=2010,month=1,day=1))
-# crawlff(datetime(year=2010,month=1,day=3), datetime(year=2011,month=1,day=1))
-# crawlff(datetime(year=2011,month=1,day=2), datetime(year=2012,month=1,day=1))
-# crawlff(datetime(year=2012,month=1,day=1), datetime(year=2013,month=1,day=1))
-# crawlff(datetime(year=2013,month=1,day=6), datetime(year=2014,month=1,day=1))
-# crawlff(datetime(year=2014,month=1,day=5), datetime(year=2015,month=1,day=1))
-# crawlff(datetime(year=2015,month=1,day=4), datetime(year=2016,month=1,day=1))
-# crawlff(datetime(year=2016,month=1,day=3), datetime(year=2017,month=1,day=1))
-# crawlff(datetime(year=2017,month=1,day=1), datetime(year=2018,month=1,day=1))
-# crawlff(datetime(year=2018,month=1,day=7), datetime(year=2019,month=1,day=1))
-# crawlff(datetime(year=2019,month=1,day=6), datetime(year=2020,month=1,day=1))
-# crawlff(datetime(year=2020,month=1,day=5), datetime(year=2021,month=1,day=1))
-# crawlff(datetime(year=2021,month=1,day=3), datetime(year=2022,month=1,day=1))
+# crawlff(get1stWeek(2006), datetime(year=2007,month=1,day=1), True)
+# crawlff(datetime(year=2007,month=1,day=7), datetime(year=2008,month=1,day=1), True)
+# crawlff(datetime(year=2008,month=1,day=6), datetime(year=2009,month=1,day=1), True)
+# crawlff(datetime(year=2009,month=1,day=4), datetime(year=2010,month=1,day=1), True)
+# crawlff(datetime(year=2010,month=1,day=3), datetime(year=2011,month=1,day=1), True)
+# crawlff(datetime(year=2011,month=1,day=2), datetime(year=2012,month=1,day=1), True)
+# crawlff(datetime(year=2012,month=1,day=1), datetime(year=2013,month=1,day=1), True)
+# crawlff(datetime(year=2013,month=1,day=6), datetime(year=2014,month=1,day=1), True)
+# crawlff(datetime(year=2014,month=1,day=5), datetime(year=2015,month=1,day=1), True)
+# crawlff(datetime(year=2015,month=1,day=4), datetime(year=2016,month=1,day=1), True)
+# crawlff(datetime(year=2016,month=1,day=3), datetime(year=2017,month=1,day=1), True)
+# crawlff(datetime(year=2017,month=1,day=1), datetime(year=2018,month=1,day=1), True)
+# crawlff(datetime(year=2018,month=1,day=7), datetime(year=2019,month=1,day=1), True)
+# crawlff(datetime(year=2019,month=1,day=6), datetime(year=2020,month=1,day=1), True)
+# crawlff(datetime(year=2020,month=1,day=5), datetime(year=2021,month=1,day=1), True)
+# crawlff(datetime(year=2021,month=1,day=3), datetime(year=2022,month=1,day=1), True)
 # crawlff(datetime(year=2022,month=1,day=2), datetime(year=2023,month=1,day=1), True)
-crawlff(datetime(year=2023,month=1,day=1), datetime(year=2024,month=1,day=1), True)
-# crawlff(datetime(year=2024,month=1,day=7), datetime(year=2025,month=1,day=1))
+# crawlff(datetime(year=2023,month=1,day=1), datetime(year=2024,month=1,day=1), True)
+crawlff(datetime(year=2024,month=1,day=7), datetime(year=2024,month=3,day=23))
 
 # parseNSaveClipboard()
         
