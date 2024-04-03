@@ -22,16 +22,17 @@ def getWeek(d: datetime) -> datetime:
 
 def loadYear(year: int):
     df = pd.read_csv(f'{dataFolder}ff{year}.csv')
-    df = df.astype({ 'currency': str, 'impact': str, 'timeLabel': str, 'name': str, 'actual': str, 'forecast': str, 'previous': str })
+    # df = df.astype({ 'currency': str, 'impact': str, 'timeLabel': str, 'name': str, 'actual': str, 'forecast': str, 'previous': str })
     return df
 
 def examineCsv(df: pd.DataFrame):
     # print(df.shape)
-    print(df.info())
-    print(df.head())
+    # print(df.info())
+    # print(df.head())
     isSortedByGmt7 = df['gmt7'].is_monotonic_increasing
     print(f'Is gmt7 sorted: {isSortedByGmt7}')
     # print(df['impact'].unique())
+    print(df['gmt7'].min())
 
 def parseImpact(s: str) -> str:
     if s.startswith('Low'): return 'Low'
@@ -49,14 +50,17 @@ def saveToDat(year: int, startDate = None, endDate = None):
         startDate: tuan bat dau: None -> tuan dau tien cua nam
         endDate: tuan ket thuc: None -> het ca nam (1/1/year+1)
     '''
-    
-    df = loadYear(year)    
+    df1 = loadYear(year-1)
+    df = loadYear(year)
+    df = pd.concat([df1, df], axis=0)
+    df = df.fillna('')
 
     # Sort by dateline
     df = df.sort_values(by=['dateline'], ignore_index=True)    
     
     # For each week
     w0 = get1stWeek(year) if startDate is None else getWeek(startDate)
+    w0 += timeZoneMq5
     wend = datetime(day=1, month=1, year=year+1) if endDate is None else endDate
 
     while w0 < wend:
@@ -77,7 +81,7 @@ def saveToDat(year: int, startDate = None, endDate = None):
                 if e['impact'] is not None: events.append(e)
 
             key = w0.strftime('%Y.%m.%d')
-            val = json.dumps(events, separators=(',', ':'))
+            val = json.dumps(events, separators=(',', ':'), allow_nan=False)
             fn = f'{dataFolder}{key}.dat'
             
             txt = json.dumps({key: val}, separators=(',', ':'))
@@ -89,8 +93,13 @@ def saveToDat(year: int, startDate = None, endDate = None):
 
         w0 = w1
 
-# ff_df = loadYear(2006)
-saveToDat(2006)
+# for y in range(2006, 2025):
+#     ff_df = loadYear(y)
+#     examineCsv(ff_df)
+        
+# ff_df = loadYear(2024)
+# ff_df.fillna('', inplace=True)
+
 saveToDat(2007)
 saveToDat(2008)
 saveToDat(2009)
@@ -108,4 +117,4 @@ saveToDat(2020)
 saveToDat(2021)
 saveToDat(2022)
 saveToDat(2023)
-saveToDat(2024, None, datetime(day=1,month=4,year=2024))
+saveToDat(2024, None, datetime(day=3,month=4,year=2024))
