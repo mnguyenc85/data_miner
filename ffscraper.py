@@ -80,7 +80,7 @@ def parseNSave(s: str) -> int:
             sow = datetime.fromtimestamp(tn_sow)
 
             key = sow.strftime('%Y.%m.%d')
-            val = json.dumps(tn_events, separators=(',', ':'))
+            val = json.dumps(tn_events, separators=(',', ':'), allow_nan=False)
             fn = f'{rootdir}{key}.dat'
             
             txt = json.dumps({key: val}, separators=(',', ':'))
@@ -148,7 +148,7 @@ def crawlff(startDate: datetime, endDate: datetime, saveCSV = False):
         x = requests.get(url, headers=headers)
         if x.status_code == 200:
             txt = x.content.decode()
-            if saveCSV:
+            if saveCSV == True:
                 fn = f'{rootdir}ff{startDate.strftime('%Y')}.csv'
                 noerr += parseNSaveCsv(txt, fn)
             else:
@@ -179,7 +179,7 @@ def crawlff(startDate: datetime, endDate: datetime, saveCSV = False):
 # crawlff(datetime(year=2021,month=1,day=3), datetime(year=2022,month=1,day=1), True)
 # crawlff(datetime(year=2022,month=1,day=2), datetime(year=2023,month=1,day=1), True)
 # crawlff(datetime(year=2023,month=1,day=1), datetime(year=2024,month=1,day=1), True)
-crawlff(datetime(year=2024,month=1,day=7), datetime(year=2024,month=3,day=23))
+crawlff(datetime(year=2024,month=4,day=21), datetime(year=2024,month=4,day=28), False)
 
 # parseNSaveClipboard()
         

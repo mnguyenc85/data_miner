@@ -1,0 +1,24 @@
+Cách dùng:
+
+Cách 1: Lấy trực tiếp từ web ra file .dat
+- Sửa file ffscraper.py
+	Dùng hàm crawff(cn_bat_dau, ngay_ket_thuc, saveCSV)
+		cn_bat_dau: là này chủ nhật của tuần cần lấy
+		ngay_ket_thuc: chỉ lấy những tuần có chủ nhật < ngày này
+		saveCSV: lưu ra file .csv hay .dat	
+			True -> ghi ra file csv theo năm
+			False -> ghi trực tiếp ra file .dat
+					
+Cách 2: Lấy ra file .csv theo năm, rồi trích từ đó ra file .dat
+- Chạy file ffscraper.py
+	Dùng hàm crawff như trên nhưng saveCSV = True
+- Chạy file converter.py
+	Dùng hàm saveToDat(nam, cn_bat_dau, ngay_ket_thuc)
+		cn_bat_dau:	là ngày chủ nhật của tuần cần lấy
+			None: sẽ bắt đầu từ tuần đầu tiên của năm
+			
+Ghi chú:
+	- ngày lấy theo hàm: datetime(day=3,month=4,year=2024)
+	- No. err: là số lỗi khi lấy
+		0: là lấy được
+		> 0: là có lỗi, ko lấy được
