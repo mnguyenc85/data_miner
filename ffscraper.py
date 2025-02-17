@@ -71,10 +71,10 @@ def convertToDatFile(days):
     return events, startOfWeek
 
 def parseNSave(s: str) -> int:
-    try:
+    # try:
         jDays = extractData(s)
         print(f'--> Number of found blocks: {len(jDays)}')
-        for s in jDays:
+        for s in jDays:            
             days = json.loads(s)
             tn_events, tn_sow = convertToDatFile(days)    
             sow = datetime.fromtimestamp(tn_sow)
@@ -92,8 +92,8 @@ def parseNSave(s: str) -> int:
 
         if len(jDays) < 1: return 1
         return 0
-    except:
-        return 1
+    # except:
+    #     return 1
 
 def parseNSaveCsv(s: str, fn: str) -> int:
     try:
@@ -144,7 +144,9 @@ def crawlff(startDate: datetime, endDate: datetime, saveCSV = False):
         print(f'Mine week: {startDate.strftime('%a %Y/%m/%d')}')
         # url = 'https://www.forexfactory.com/calendar?week=feb25.2024'
         url = f'https://www.forexfactory.com/calendar?week={startDate.strftime('%b%d.%Y')}'
-        headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' }
+        headers = { 
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
+        }
         x = requests.get(url, headers=headers)
         if x.status_code == 200:
             txt = x.content.decode()
@@ -179,7 +181,7 @@ def crawlff(startDate: datetime, endDate: datetime, saveCSV = False):
 # crawlff(datetime(year=2021,month=1,day=3), datetime(year=2022,month=1,day=1), True)
 # crawlff(datetime(year=2022,month=1,day=2), datetime(year=2023,month=1,day=1), True)
 # crawlff(datetime(year=2023,month=1,day=1), datetime(year=2024,month=1,day=1), True)
-crawlff(datetime(year=2024,month=4,day=21), datetime(year=2024,month=4,day=28), False)
+# crawlff(datetime(year=2025,month=1,day=1), datetime(year=2025,month=2,day=1), False)
 
-# parseNSaveClipboard()
+parseNSaveClipboard()
         

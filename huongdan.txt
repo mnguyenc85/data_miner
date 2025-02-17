@@ -1,4 +1,4 @@
-Cách dùng:
+﻿Cách dùng:
 
 Cách 1: Lấy trực tiếp từ web ra file .dat
 - Sửa file ffscraper.py
@@ -22,3 +22,4 @@ Ghi chú:
 	- No. err: là số lỗi khi lấy
 		0: là lấy được
 		> 0: là có lỗi, ko lấy được
+	- link github: https://github.com/mnguyenc85/data_miner
